@@ -20,10 +20,9 @@ def count(tetrises):
         s[i] = len([j for j in tetrises if j == i])
     return str(s)
 
-#agent.loss = torch.nn.MSELoss()
 agent.optimizer = torch.optim.Adam(agent.local_Q.parameters(), 1e-4)
-print(agent.optimizer)
-print(agent.loss)
+#print(agent.optimizer)
+#print(agent.loss)
 
 all_tetrises = []
 for episode in range(agent.start, num_iter):

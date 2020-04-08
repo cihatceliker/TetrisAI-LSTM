@@ -6,7 +6,7 @@ import sys
 EMPTY = 0.0
 PIECE = 1.0
 
-DEATH_REWARD = -8
+DEATH_REWARD = -32
 DROP_CLEAR = lambda x: x * 1.2
 
 # ARS rotation
@@ -113,7 +113,6 @@ class Environment:
         
         if complete_lines > 0:
             self.tetrises.append(complete_lines)
-        #if complete_lines > 1: print("tetris", complete_lines)
 
         return complete_lines
 

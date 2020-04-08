@@ -21,6 +21,7 @@ COLORS = {
 class GameGrid():
 
     def __init__(self, speed=0.02, size=720):
+        self.draw_next_offset = size/4
         width = size / 2
         height = size
         self.root = Tk()
@@ -33,7 +34,6 @@ class GameGrid():
         self.size = size
         self.rectangle_size = size/self.env.row
         self.pause = False
-        self.quit = False
         self.image_counter = 0
         self.commands = {
             113: 1, # Left
@@ -67,7 +67,7 @@ class GameGrid():
         return board_repr
             
     def watch_play(self):
-        while not self.quit:
+        while True:
             duration = 0
             done = False
             state, next_piece = self.env.reset()
@@ -94,7 +94,6 @@ class GameGrid():
             self.update()
             #self.take_screenshot()
             time.sleep(self.speed)
-
 
     def init(self):
         def draw(x1, y1, sz, color, func):
