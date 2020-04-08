@@ -20,9 +20,9 @@ def count(tetrises):
         s[i] = len([j for j in tetrises if j == i])
     return str(s)
 
-agent.optimizer = torch.optim.Adam(agent.local_Q.parameters(), 1e-4)
-#print(agent.optimizer)
-#print(agent.loss)
+agent.optimizer = torch.optim.Adam(agent.local_Q.parameters(), 8e-5)
+print(agent.optimizer)
+print(agent.loss)
 
 all_tetrises = []
 for episode in range(agent.start, num_iter):
@@ -50,13 +50,13 @@ for episode in range(agent.start, num_iter):
     agent.durations.append(ep_duration)
     agent.start = episode
 
-    if ep_duration > 1500 or 4 in env.tetrises:
+    if ep_duration > 1400 or 4 in env.tetrises:
         pickle_out = open(str(ep_duration)+str(4 in env.tetrises)+".ep","wb")
         pickle.dump(trajectory, pickle_out)
         pickle_out.close()
         print("trajectory saved to : " + str(ep_duration)+str(4 in env.tetrises)+".ep")
 
-    if episode % print_interval == 0 or ep_duration > 1500:
+    if episode % print_interval == 0 or ep_duration > 1600:
         avg_score = np.mean(agent.scores[max(0, episode-print_interval):(episode+1)])
         avg_duration = np.mean(agent.durations[max(0, episode-print_interval):(episode+1)])
         if episode % save_interval == 0:

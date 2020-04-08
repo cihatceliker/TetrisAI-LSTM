@@ -113,6 +113,7 @@ class Environment:
         
         if complete_lines > 0:
             self.tetrises.append(complete_lines)
+        #if complete_lines > 1: print("tetris", complete_lines)
 
         return complete_lines
 
@@ -138,7 +139,7 @@ class Environment:
                     piece_found = True
                 if piece_found and board[i,j] == EMPTY:
                     holes += 1
-        return aggregate_height * -0.51 + bumpiness * -0.18 + holes * -1.3
+        return aggregate_height * -0.51 + bumpiness * -0.18 + holes * -2
 
     def board_to_channels(self, board):
         obs = np.zeros((4,self.row,self.col))

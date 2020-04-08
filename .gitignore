@@ -2,6 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.tt
+episodes/
+im.py
+ppo.py
+*.ipynb
 
 # C extensions
 *.so
