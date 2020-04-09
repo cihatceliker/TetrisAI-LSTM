@@ -53,7 +53,7 @@ class CNN(nn.Module):
 
 class Agent():
     
-    def __init__(self, num_actions, gamma=0.992, alpha=5e-4, tau=1e-3):
+    def __init__(self, num_actions, gamma=0.992, alpha=7e-4, tau=1e-3):
         self.local_Q = Network(num_actions)
         self.target_Q = Network(num_actions)
         self.target_Q.load_state_dict(self.local_Q.state_dict())

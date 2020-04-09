@@ -3,12 +3,11 @@ import threading
 import numpy as np
 import random
 import pickle
-from environment import Environment, ALL_SHAPES
+from environment import Environment
 from tkinter import Frame, Canvas, Tk
 from agent import Agent, load_agent
 import sys
 from pyscreenshot import grab
-#import pyautogui
 import pickle
 
 COLORS = {
@@ -21,7 +20,6 @@ COLORS = {
 class GameGrid():
 
     def __init__(self, speed=0.02, size=720):
-        self.draw_next_offset = size/4
         width = size / 2
         height = size
         self.root = Tk()
@@ -35,14 +33,6 @@ class GameGrid():
         self.rectangle_size = size/self.env.row
         self.pause = False
         self.image_counter = 0
-        self.commands = {
-            113: 1, # Left
-            114: 2, # Right
-            53: 3, # Z
-            52: 4, # X
-            65: 5, # Drop
-            37: 0 # Do nothing
-        }
         self.init()
         self.root.title('Tetris')
 
@@ -79,6 +69,7 @@ class GameGrid():
                 duration += 1
                 time.sleep(self.speed)
             print("duration", duration)
+            print(self.env.tetrises)
 
     def update(self):
         for i in range(self.board.shape[0]):
@@ -92,7 +83,6 @@ class GameGrid():
         for state in self.processed:
             self.board = state
             self.update()
-            #self.take_screenshot()
             time.sleep(self.speed)
 
     def init(self):

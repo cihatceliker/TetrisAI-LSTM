@@ -7,7 +7,11 @@ EMPTY = 0.0
 PIECE = 1.0
 
 DEATH_REWARD = -32
-DROP_CLEAR = lambda x: x * 1.2
+DROP = lambda x: x * 1.2
+HOLES = -8
+BUMPINESS = -0.2
+AGG_HEIGHT = -0.5
+CLEAR_LINE = 0.9
 
 # ARS rotation
 SHAPES = {
@@ -84,14 +88,14 @@ class Environment:
 
         score = 0
         if not self._move((1,0)):
-            score += self.check_complete_lines()**3# * 0.76
+            score += self.check_complete_lines() * CLEAR_LINE
             self.add_new_piece()
             score += self.check_rows(self.board.copy())
             self.reward += score - self.previous_score
             self.previous_score = score
         
         if action == 5:
-            self.reward = DROP_CLEAR(self.reward)
+            self.reward = DROP(self.reward)
         
         return self.process_state(), self.reward, self.done, self.encode_next_piece()
 
@@ -110,11 +114,8 @@ class Environment:
         complete_lines = len(idxs)
         for idx in reversed(idxs):
             self.board[1:idx+1,:] = self.board[0:idx,:]
-        
-        if complete_lines > 0:
+        if complete_lines:
             self.tetrises.append(complete_lines)
-        #if complete_lines > 1: print("tetris", complete_lines)
-
         return complete_lines
 
     def check_rows(self, board):
@@ -139,7 +140,7 @@ class Environment:
                     piece_found = True
                 if piece_found and board[i,j] == EMPTY:
                     holes += 1
-        return aggregate_height * -0.51 + bumpiness * -0.18 + holes * -2
+        return aggregate_height * AGG_HEIGHT + bumpiness * BUMPINESS + holes * HOLES
 
     def board_to_channels(self, board):
         obs = np.zeros((4,self.row,self.col))
