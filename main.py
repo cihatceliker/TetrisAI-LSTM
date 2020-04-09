@@ -13,13 +13,21 @@ save_interval = 100
 
 env = Environment()
 agent = Agent(num_actions) if len(sys.argv) == 1 else load_agent(sys.argv[1])  
-print(agent.optimizer)
 
 def count(tetrises):
     s = {}
     for i in range(1,5):
         s[i] = len([j for j in tetrises if j == i])
     return str(s)
+
+def save_trajectory(trajectory):
+    pickle_out = open(str(ep_duration)+str(4 in env.tetrises)+".ep","wb")
+    pickle.dump(trajectory, pickle_out)
+    pickle_out.close()
+    print("trajectory saved to : " + str(ep_duration)+str(4 in env.tetrises)+".ep")
+    
+agent.optimizer = torch.optim.Adam(agent.local_Q.parameters(), 5e-4)
+#print(agent.optimizer)
 
 
 all_tetrises = []
@@ -42,18 +50,12 @@ for episode in range(agent.start, num_iter):
 
     agent.learn(trajectory)
     all_tetrises += env.tetrises
-
     agent.episodes.append(episode)
     agent.scores.append(score)
     agent.durations.append(ep_duration)
     agent.start = episode
-
-    if ep_duration > 1600 or (4 in env.tetrises and ep_duration > 1200):
-        pickle_out = open(str(ep_duration)+str(4 in env.tetrises)+".ep","wb")
-        pickle.dump(trajectory, pickle_out)
-        pickle_out.close()
-        print("trajectory saved to : " + str(ep_duration)+str(4 in env.tetrises)+".ep")
-        
+    
+    if ep_duration > 2000 or (4 in env.tetrises and ep_duration > 1500): save_trajectory(trajectory)
     if episode % save_interval == 0:
         agent.start = episode + 1
         agent.save(str(episode))

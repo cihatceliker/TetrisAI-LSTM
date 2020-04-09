@@ -33,7 +33,7 @@ class CNN(nn.Module):
     
     def __init__(self, out_size):
         super(CNN, self).__init__()
-        in_channels = 8
+        in_channels = 4
         self.convR = nn.Conv2d(in_channels, 8, (20,1))
         self.convC = nn.Conv2d(in_channels, 8, (1,10))
         self.conv1 = nn.Conv2d(in_channels, 16, 5, padding=2)
@@ -53,7 +53,7 @@ class CNN(nn.Module):
 
 class Agent():
     
-    def __init__(self, num_actions, gamma=0.992, alpha=7e-4, tau=1e-3):
+    def __init__(self, num_actions, gamma=0.997, alpha=1e-3, tau=1e-3):
         self.local_Q = Network(num_actions)
         self.target_Q = Network(num_actions)
         self.target_Q.load_state_dict(self.local_Q.state_dict())

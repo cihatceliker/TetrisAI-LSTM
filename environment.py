@@ -7,11 +7,11 @@ EMPTY = 0.0
 PIECE = 1.0
 
 DEATH_REWARD = -32
-DROP = lambda x: x * 1.2
-HOLES = -8
+DROP = lambda x: x * 1.5
+HOLES = -1#-3
 BUMPINESS = -0.2
-AGG_HEIGHT = -0.5
-CLEAR_LINE = 0.9
+AGG_HEIGHT = -0.6#-0.5
+CLEAR_LINE = 1
 
 # ARS rotation
 SHAPES = {
@@ -79,8 +79,7 @@ class Environment:
         self.previous_score = 0
         self.done = False
         self.tetrises = []
-        self.previous = self.board_to_channels(self.board.copy())
-        return self.process_state(), self.encode_next_piece()
+        return self.board_to_channels(self.board.copy()), self.encode_next_piece()
 
     def step(self, action):
         self.reward = 0
@@ -90,21 +89,14 @@ class Environment:
         if not self._move((1,0)):
             score += self.check_complete_lines() * CLEAR_LINE
             self.add_new_piece()
-            score += self.check_rows(self.board.copy())
+            score += self.analyze(self.board.copy())
             self.reward += score - self.previous_score
             self.previous_score = score
         
         if action == 5:
             self.reward = DROP(self.reward)
         
-        return self.process_state(), self.reward, self.done, self.encode_next_piece()
-
-    def process_state(self):
-        output = np.zeros((8, self.row, self.col))
-        output[:4] = self.board_to_channels(self.board.copy())
-        output[4:] = self.previous
-        self.previous = output[:4]
-        return output
+        return self.board_to_channels(self.board.copy()), self.reward, self.done, self.encode_next_piece()
 
     def check_complete_lines(self):
         idxs = []
@@ -118,7 +110,7 @@ class Environment:
             self.tetrises.append(complete_lines)
         return complete_lines
 
-    def check_rows(self, board):
+    def analyze(self, board):
         for i, j in self.current_piece:
             board[i+self.rel_x,j+self.rel_y] = EMPTY
         aggregate_height = 0
