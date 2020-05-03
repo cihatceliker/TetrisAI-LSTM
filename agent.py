@@ -2,12 +2,9 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 import numpy as np
-import random
-import math
-import sys
 import pickle
 
-device = torch.device("cuda")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Network(nn.Module):
@@ -89,6 +86,7 @@ class Agent():
         action_batch = torch.tensor(batch[2], device=device)
         reward_batch = torch.tensor(batch[3], device=device)
         
+        # applying DoubleDQN
         indexes = np.arange(state_batch.size(0))
         prediction = self.local_Q(state_batch, next_piece_batch)[0][indexes,0,action_batch]
         evaluated = torch.zeros_like(prediction)
