@@ -10,7 +10,9 @@ print_interval = 10
 save_interval = 100
 
 env = Environment()
-agent = Agent(num_actions) if len(sys.argv) == 1 else load_agent(sys.argv[1])  
+agent = Agent(num_actions)
+
+if len(sys.argv) == 2: agent.load_brain(sys.argv[1])
 
 def count(tetrises):
     s = {}

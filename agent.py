@@ -107,6 +107,17 @@ class Agent():
         pickle_out = open(filename+".tt","wb")
         pickle.dump(self, pickle_out)
         pickle_out.close()
+    
+    def save_brain(self, filename):
+        d = {}
+        d["local"] = self.local_Q.state_dict()
+        d["target"] = self.target_Q.state_dict()
+        torch.save(d, filename)    
+
+    def load_brain(self, filename):
+        d = torch.load(filename)
+        self.local_Q.load_state_dict(d["local"])
+        self.target_Q.load_state_dict(d["target"])
 
 
 def load_agent(filename):

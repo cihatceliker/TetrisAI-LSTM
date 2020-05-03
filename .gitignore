@@ -2,8 +2,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-*.tt
-*.ep
 episodes/
 im.py
 ppo.py

@@ -3,12 +3,11 @@ import threading
 import numpy as np
 import random
 import pickle
-from environment import Environment
-from tkinter import Frame, Canvas, Tk
-from agent import Agent, load_agent
 import sys
-from pyscreenshot import grab
 import pickle
+from tkinter import Frame, Canvas, Tk
+from environment import Environment
+from agent import Agent, load_agent
 
 COLORS = {
     0: "#fff",    # BACKGROUND
@@ -36,6 +35,9 @@ class GameGrid():
         self.init()
         self.root.title('Tetris')
 
+        # if yo want to watch a replay, use
+        # python gui.py [filename].ep 55
+        # 55 or any other input. its just to indicate that it is a replay file
         if 3 == len(sys.argv):
             history = load_agent(sys.argv[1])
             self.processed = []
@@ -43,9 +45,9 @@ class GameGrid():
                 self.processed.append(self.process_channels(state))
             threading.Thread(target=self.watch_history).start()
         else:
-            self.agent = Agent(6) if len(sys.argv) == 1 else load_agent(sys.argv[1])
-            print("duration",max(self.agent.durations))
-            print("score",max(self.agent.scores))
+            self.agent = Agent(6)
+            if len(sys.argv) == 2:
+                self.agent.load_brain(sys.argv[1])
             threading.Thread(target=self.watch_play).start()
         self.root.mainloop()
 
@@ -61,6 +63,7 @@ class GameGrid():
             duration = 0
             done = False
             state, next_piece = self.env.reset()
+            self.agent.init_hidden()
             while not done:
                 action = self.agent.select_action(state, next_piece)
                 state, reward, done, next_piece = self.env.step(action)
@@ -68,8 +71,6 @@ class GameGrid():
                 self.update()
                 duration += 1
                 time.sleep(self.speed)
-            print("duration", duration)
-            print(self.env.tetrises)
 
     def update(self):
         for i in range(self.board.shape[0]):
