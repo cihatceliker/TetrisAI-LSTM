@@ -16,7 +16,7 @@ COLORS = {
 
 class GameGrid():
 
-    def __init__(self, speed=0.02, size=720):
+    def __init__(self, speed=0.01, size=720):
         width = size / 2
         height = size
         self.root = Tk()
@@ -33,21 +33,15 @@ class GameGrid():
         self.init()
         self.root.title('Tetris')
 
-        # len 3 is just to indicate that it is a replay file
-        if 3 == len(sys.argv):
-            # processes states
-            history = load_agent(sys.argv[1])
-            self.processed = []
-            for state,_,_,_ in history:
-                self.processed.append(self.process_channels(state))
-            threading.Thread(target=self.watch_history).start()
-        else:
-            self.agent = Agent(6)
-            # if a file is specified, assumes its a trained model 
-            if len(sys.argv) == 2:
-                self.agent.load_brain(sys.argv[1])
-            threading.Thread(target=self.watch_play).start()
-        self.root.mainloop()
+        if len(sys.argv) != 2:
+            print("you need to specify a model file")
+            sys.exit(3)
+
+        self.agent = Agent(6)
+        self.agent.load_brain(sys.argv[1])
+
+        self.watch_play()
+        
 
     # takes input with 4 channels and gives a 2d output
     def process_channels(self, obs):
@@ -59,24 +53,17 @@ class GameGrid():
     
     # standart game loop to watch the agent play
     def watch_play(self):
-        while True:
-            duration = 0
-            done = False
-            state, next_piece = self.env.reset()
-            self.agent.init_hidden()
-            while not done:
-                action = self.agent.select_action(state, next_piece)
-                state, reward, done, next_piece = self.env.step(action)
-                self.board = self.process_channels(state)
-                self.update()
-                duration += 1
-                time.sleep(self.speed)
-
-    # watches proccessed history
-    def watch_history(self):
-        for state in self.processed:
-            self.board = state
+        duration = 0
+        done = False
+        state, next_piece = self.env.reset()
+        self.agent.init_hidden()
+        while not done:
+            action = self.agent.select_action(state, next_piece)
+            state, reward, done, next_piece = self.env.step(action)
+            self.board = self.process_channels(state)
             self.update()
+            self.root.update()
+            duration += 1
             time.sleep(self.speed)
 
     # update colors

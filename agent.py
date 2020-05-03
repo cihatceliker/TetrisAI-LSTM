@@ -129,7 +129,7 @@ class Agent():
         torch.save(d, filename)    
 
     def load_brain(self, filename):
-        d = torch.load(filename)
+        d = torch.load(filename, map_location=device)
         self.local_Q.load_state_dict(d["local"])
         self.target_Q.load_state_dict(d["target"])
 

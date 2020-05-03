@@ -13,13 +13,13 @@ Here is a summary of the model
                                       ----- Input --
                                     /         |      \
                                    V          |       \
-            Conv2d(8, 16, 5, padding=2)       |        \
+            Conv2d(4, 16, 5, padding=2)       |        \
                         |                     |         \
                         V                     |          \
             Conv2d(16, 24, 3, padding=1)      |           \  
                         |                     V            V
                         V
-    NextPieceInfo - MaxPool2d(2) - Conv2d(8, 8, (20,1)) - Conv2d(8, 8, (1,10)) 
+    NextPieceInfo - MaxPool2d(2) - Conv2d(4, 8, (20,1)) - Conv2d(4, 8, (1,10)) 
         
                     Concatenation
                         |
