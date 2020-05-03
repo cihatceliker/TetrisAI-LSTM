@@ -4,7 +4,9 @@ import torch.nn as nn
 import numpy as np
 import pickle
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print("runs on %s." % device)
+device = torch.device(device)
 
 
 class Network(nn.Module):
@@ -22,6 +24,7 @@ class Network(nn.Module):
         output, hidden = self.rnn(features, hidden if hidden else self.init_hidden())
         return self.out(output), hidden
 
+    # returns two zero tensors for the initial state of the lstm
     def init_hidden(self, sz=256):
         return [torch.zeros((1,1,sz), device=device, dtype=torch.float)]*2
 
@@ -79,6 +82,16 @@ class Agent():
         return action
 
     def learn(self, trajectory):
+        # trajectory is an array of [state, next_piece, action, reward]
+        #                           [state, next_piece, action, reward]
+        #                                            .
+        #                                            .
+        #                                            .
+        # transposing the trajectory gives an array of 
+        #                           [state,      ..., state     ]
+        #                           [next_piece, ..., next_piece]
+        #                           [action,     ..., action    ]
+        #                           [reward,     ..., reward    ]
         batch = list(zip(*trajectory))
 
         state_batch = torch.tensor(batch[0], device=device, dtype=torch.float)
@@ -86,7 +99,7 @@ class Agent():
         action_batch = torch.tensor(batch[2], device=device)
         reward_batch = torch.tensor(batch[3], device=device)
         
-        # applying DoubleDQN
+        # implementation of the DoubleDQN algorithm.
         indexes = np.arange(state_batch.size(0))
         prediction = self.local_Q(state_batch, next_piece_batch)[0][indexes,0,action_batch]
         evaluated = torch.zeros_like(prediction)
@@ -100,6 +113,7 @@ class Agent():
         self.loss(prediction, evaluated).to(device).backward()
         self.optimizer.step()
 
+        # smoothly updating the target network
         for target_param, local_param in zip(self.target_Q.parameters(), self.local_Q.parameters()):
             target_param.data.copy_(self.tau * local_param.data + (1 - self.tau) * target_param.data)
         

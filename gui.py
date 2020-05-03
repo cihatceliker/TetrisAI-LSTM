@@ -1,10 +1,8 @@
 import time
 import threading
 import numpy as np
-import random
 import pickle
 import sys
-import pickle
 from tkinter import Frame, Canvas, Tk
 from environment import Environment
 from agent import Agent, load_agent
@@ -35,10 +33,9 @@ class GameGrid():
         self.init()
         self.root.title('Tetris')
 
-        # if yo want to watch a replay, use
-        # python gui.py [filename].ep 55
-        # 55 or any other input. its just to indicate that it is a replay file
+        # len 3 is just to indicate that it is a replay file
         if 3 == len(sys.argv):
+            # processes states
             history = load_agent(sys.argv[1])
             self.processed = []
             for state,_,_,_ in history:
@@ -46,18 +43,21 @@ class GameGrid():
             threading.Thread(target=self.watch_history).start()
         else:
             self.agent = Agent(6)
+            # if a file is specified, assumes its a trained model 
             if len(sys.argv) == 2:
                 self.agent.load_brain(sys.argv[1])
             threading.Thread(target=self.watch_play).start()
         self.root.mainloop()
 
+    # takes input with 4 channels and gives a 2d output
     def process_channels(self, obs):
         board_repr = np.zeros((20,10))
         board_repr[obs[2]==1] = 2
         board_repr[obs[1]==1] = 1
         board_repr[obs[0]==1] = 3
         return board_repr
-            
+    
+    # standart game loop to watch the agent play
     def watch_play(self):
         while True:
             duration = 0
@@ -72,6 +72,14 @@ class GameGrid():
                 duration += 1
                 time.sleep(self.speed)
 
+    # watches proccessed history
+    def watch_history(self):
+        for state in self.processed:
+            self.board = state
+            self.update()
+            time.sleep(self.speed)
+
+    # update colors
     def update(self):
         for i in range(self.board.shape[0]):
             for j in range(self.board.shape[1]):
@@ -80,12 +88,7 @@ class GameGrid():
                 color = COLORS[curr]
                 self.game.itemconfig(rect, fill=color)
 
-    def watch_history(self):
-        for state in self.processed:
-            self.board = state
-            self.update()
-            time.sleep(self.speed)
-
+    # init colors
     def init(self):
         def draw(x1, y1, sz, color, func):
             return func(x1, y1, x1+sz, y1+sz, fill=color, width=0)

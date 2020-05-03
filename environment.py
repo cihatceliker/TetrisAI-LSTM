@@ -1,16 +1,15 @@
-import os
 import numpy as np
-import random
-import sys
 
 EMPTY = 0.0
 PIECE = 1.0
 
 DEATH_REWARD = -32
 DROP = lambda x: x * 1.5
-HOLES = -1#-3
+
+# weights of the features
+HOLES = -1
 BUMPINESS = -0.2
-AGG_HEIGHT = -0.6#-0.5
+AGG_HEIGHT = -0.6
 CLEAR_LINE = 1
 
 # ARS rotation
@@ -50,6 +49,7 @@ def rotate_n_times(shape, n):
         new_shape.append(tuple(new_coor))
     return new_shape
 
+# stores all different rotations for all shapes, in ALL_SHAPES
 for n in range(4):
     ALL_SHAPES[n].append(SHAPES[0][0])
     for shape in SHAPES[2]:
@@ -72,6 +72,7 @@ class Environment:
             5: (self._drop, None)
         }
 
+    # creates board and adds piece
     def reset(self):
         self.board = np.ones((self.row, self.col)) * EMPTY
         self.next_piece = np.random.randint(0,7)
@@ -81,6 +82,14 @@ class Environment:
         self.tetrises = []
         return self.board_to_channels(self.board.copy()), self.encode_next_piece()
 
+    # given the action, first acts, then
+    # check rewards only when the current piece hits the ground
+    # the difference in the score will be added as reward
+    # returns 
+    #   the channeled version of the board,
+    #   reward, 
+    #   if its done or not
+    #   encoded next piece
     def step(self, action):
         self.reward = 0
         self.actions[action][0](self.actions[action][1])
@@ -93,11 +102,13 @@ class Environment:
             self.reward += score - self.previous_score
             self.previous_score = score
         
+        # dropping a piece, magnifies the reward
         if action == 5:
             self.reward = DROP(self.reward)
         
         return self.board_to_channels(self.board.copy()), self.reward, self.done, self.encode_next_piece()
 
+    # checks and clears the complete lines
     def check_complete_lines(self):
         idxs = []
         for i in range(self.row-1, 0, -1):
@@ -106,10 +117,13 @@ class Environment:
         complete_lines = len(idxs)
         for idx in reversed(idxs):
             self.board[1:idx+1,:] = self.board[0:idx,:]
+        # keep tracks of the cleared lines
         if complete_lines:
             self.tetrises.append(complete_lines)
         return complete_lines
 
+    # intermediate reward function
+    # given the 2d board as input, checks 3 different features.
     def analyze(self, board):
         for i, j in self.current_piece:
             board[i+self.rel_x,j+self.rel_y] = EMPTY
@@ -134,6 +148,11 @@ class Environment:
                     holes += 1
         return aggregate_height * AGG_HEIGHT + bumpiness * BUMPINESS + holes * HOLES
 
+    # takes board and separates it to 4 different channels
+    #1. 1 if current piece else 0
+    #2. 1 if shadow piece else 0
+    #3. 1 if grounded piece else 0
+    #4. 1 if empty else 0
     def board_to_channels(self, board):
         obs = np.zeros((4,self.row,self.col))
         for i, j in self.current_piece:
@@ -157,11 +176,13 @@ class Environment:
                     obs[3, i, j] = 1
         return obs
 
+    # one hot encode the next piece index
     def encode_next_piece(self):
         out = np.zeros(7)
         out[self.next_piece] = 1
         return out
 
+    # if possible, adds new piece.
     def add_new_piece(self, drop_point=(1,5)):
         self.rot_index = 0
         self.rel_x, self.rel_y = drop_point
@@ -174,6 +195,7 @@ class Environment:
         else:
             self._set(num=PIECE)
 
+    # checks for boundaries and grounded pieces.
     def is_available(self, shape, to, relative, board):
         x, y = to
         k, l = relative
@@ -184,6 +206,7 @@ class Environment:
                 return False
         return True
 
+    # set empty, rotate if possible, set piece
     def _rotate(self, clockwise):
         to = 1 if clockwise else -1
         new_rot_idx = (self.rot_index + to) % 4
@@ -194,11 +217,13 @@ class Environment:
             self.rot_index = new_rot_idx
         self._set(num=PIECE)
 
+    # sets the relative tiles to the given number
     def _set(self, num):
         x, y = self.rel_x, self.rel_y
         for i, j in self.current_piece:
             self.board[i+x,j+y] = num
 
+    # set empty, move, set piece
     def _move(self, to):
         self._set(num=EMPTY)
         if self.is_available(self.current_piece, to, (self.rel_x, self.rel_y), self.board):
@@ -209,6 +234,7 @@ class Environment:
         self._set(num=PIECE)
         return False
 
+    # drops the current piece
     def _drop(self, _):
         while self._move((1,0)):
             pass

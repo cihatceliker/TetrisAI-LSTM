@@ -46,6 +46,7 @@ for episode in range(agent.start, num_iter):
     # it will learn only at the end of the episodes
     agent.learn(trajectory)
 
+    # stats
     all_tetrises += env.tetrises
     agent.episodes.append(episode)
     agent.scores.append(score)
@@ -63,6 +64,7 @@ for episode in range(agent.start, num_iter):
         agent.start = episode + 1
         agent.save(str(episode))
 
+    # prints some stats about the last interval
     if episode % print_interval == 0:
         avg_score = np.mean(agent.scores[max(0, episode-print_interval):(episode+1)])
         avg_duration = np.mean(agent.durations[max(0, episode-print_interval):(episode+1)])
