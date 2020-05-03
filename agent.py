@@ -5,8 +5,6 @@ import numpy as np
 import pickle
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-print("runs on %s." % device)
-device = torch.device(device)
 
 
 class Network(nn.Module):
@@ -54,6 +52,9 @@ class CNN(nn.Module):
 class Agent():
     
     def __init__(self, num_actions, gamma=0.997, alpha=1e-3, tau=1e-3):
+        global device
+        print("runs on %s." % device)
+        device = torch.device(device)
         self.local_Q = Network(num_actions)
         self.target_Q = Network(num_actions)
         self.target_Q.load_state_dict(self.local_Q.state_dict())

@@ -1,8 +1,7 @@
 import time
-import threading
 import numpy as np
-import pickle
 import sys
+import agent
 from tkinter import Frame, Canvas, Tk
 from environment import Environment
 from agent import Agent, load_agent
@@ -16,7 +15,7 @@ COLORS = {
 
 class GameGrid():
 
-    def __init__(self, speed=0.01, size=720):
+    def __init__(self, speed=0.02, size=720):
         width = size / 2
         height = size
         self.root = Tk()
@@ -37,6 +36,7 @@ class GameGrid():
             print("you need to specify a model file")
             sys.exit(3)
 
+        agent.device = "cpu"
         self.agent = Agent(6)
         self.agent.load_brain(sys.argv[1])
 
