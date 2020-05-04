@@ -34,6 +34,7 @@ for episode in range(agent.start, num_iter):
     # initial state for lstm
     agent.init_hidden()
 
+    # standard game loop
     while not done:
         action = agent.select_action(state, next_piece)
         next_state, reward, done, next_next_piece = env.step(action)
